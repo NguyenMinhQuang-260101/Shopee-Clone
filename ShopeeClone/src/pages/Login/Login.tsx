@@ -27,7 +27,10 @@ export default function Login() {
                 <div className='mt-1 text-[#ff424f] min-h-[1rem] text-sm'></div>
               </div>
               <div className='mt-3'>
-                <button className='w-full bg-orange text-white p-3 rounded-sm mt-4 hover:bg-orange/80 uppercase'>
+                <button
+                  type='submit'
+                  className='w-full bg-orange text-white p-3 rounded-sm mt-4 hover:bg-orange/80 uppercase'
+                >
                   đăng nhập
                 </button>
               </div>
