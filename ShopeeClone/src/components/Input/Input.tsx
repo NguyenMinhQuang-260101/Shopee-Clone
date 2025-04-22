@@ -7,7 +7,7 @@ interface Props {
   placeholder?: string
   className?: string
   name: keyof FormData
-  register: UseFormRegister<FormData>
+  register: UseFormRegister<FormData> | UseFormRegister<Omit<FormData, 'confirm_password'>>
   rules?: RegisterOptions<FormData, keyof FormData>
   autoComplete?: string
 }
@@ -29,7 +29,7 @@ export default function Input({
         className='p-3 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
         placeholder={placeholder}
         autoComplete={autoComplete}
-        {...register(name, rules)}
+        {...(register as UseFormRegister<FormData>)(name, rules)}
       />
       <div className='mt-1 text-[#ff424f] min-h-[1.25rem] text-sm'>{errorMessage}</div>
     </div>
