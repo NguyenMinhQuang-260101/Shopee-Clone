@@ -1,7 +1,8 @@
 import { RegisterOptions } from 'react-hook-form'
+import { FormData } from '../types/Register.type'
 
 type Rules = {
-  [key in 'email' | 'password' | 'confirm_password']?: RegisterOptions
+  [key in keyof FormData]?: RegisterOptions<FormData, key>
 }
 
 export const rules: Rules = {
@@ -42,10 +43,9 @@ export const rules: Rules = {
       value: true,
       message: 'Vui lòng nhập lại mật khẩu'
     },
-    validate: (value, { password }) => {
-      if (value !== password) {
-        return 'Mật khẩu không khớp'
-      }
+    validate: (value: string, formValues: FormData): string | boolean => {
+      // Giải thích: Nếu value === formValues.password thì trả về true, ngược lại trả về thông báo lỗi
+      return value === formValues.password || 'Mật khẩu không khớp'
     }
   }
 }
