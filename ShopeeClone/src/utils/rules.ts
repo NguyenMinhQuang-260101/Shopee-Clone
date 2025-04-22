@@ -1,5 +1,5 @@
 import { RegisterOptions } from 'react-hook-form'
-import { FormData } from '../types/Register.type'
+import { FormData } from '../types/register.type'
 
 type Rules = {
   [key in keyof FormData]?: RegisterOptions<FormData, key>
