@@ -1,5 +1,3 @@
-export interface FormData {
-  email: string
-  password: string
-  confirm_password: string
-}
+import { Schema } from '../utils/rules'
+
+export type FormData = Schema
