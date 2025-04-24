@@ -1,30 +1,21 @@
-import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FloatingPortal, useFloating, arrow, FloatingArrow, shift } from '@floating-ui/react'
-import { motion, AnimatePresence } from 'framer-motion'
+import Popover from '../Popover'
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false)
-  const arrowRef = React.useRef<SVGSVGElement>(null)
-  const { refs, floatingStyles, context, middlewareData } = useFloating({
-    middleware: [shift(), arrow({ element: arrowRef })]
-  })
-  const showPopover = () => {
-    setIsOpen(true)
-  }
-  const hidePopover = () => {
-    setIsOpen(false)
-  }
-
   return (
     <div className='pb-5 pt-2 bg-[linear-gradient(-180deg,#f53d2d,#f63)] text-white'>
       <div className='container'>
         <div className='flex justify-end'>
-          <div
+          <Popover
+            as={'span'}
+            // initialIsOpen={true}
             className='flex items-center py-1 hover:text-gray-300 cursor-pointer'
-            ref={refs.setReference}
-            onMouseEnter={showPopover}
-            onMouseLeave={hidePopover}
+            renderPopover={
+              <div className='flex flex-col py-2 w-52 pl-3'>
+                <button className='hover:text-orange text-left py-2 max-w-fit'>Tiếng Việt</button>
+                <button className='hover:text-orange text-left py-2 max-w-fit'>English</button>
+              </div>
+            }
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -51,33 +42,30 @@ export default function Header() {
             >
               <path strokeLinecap='round' strokeLinejoin='round' d='m19.5 8.25-7.5 7.5-7.5-7.5' />
             </svg>
-            <FloatingPortal>
-              <AnimatePresence>
-                {isOpen && (
-                  <div ref={refs.setFloating} style={floatingStyles}>
-                    <motion.div
-                      className='bg-white relative shadow-md rounded-sm border border-gray-200'
-                      initial={{ opacity: 0, transform: 'scale(0)' }}
-                      animate={{ opacity: 1, transform: 'scale(1)' }}
-                      exit={{ opacity: 0, transform: 'scale(0)' }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        transformOrigin: `${middlewareData.arrow?.x}px top`
-                      }}
-                    >
-                      <FloatingArrow ref={arrowRef} context={context} fill='white' />
-                      <div className='flex flex-col py-2 px-10'>
-                        <button className='py-2 px-10 hover:text-orange'>Tiếng Việt</button>
-                        <button className='py-2 px-10 hover:text-orange'>English</button>
-                      </div>
-                    </motion.div>
-                  </div>
-                )}
-              </AnimatePresence>
-            </FloatingPortal>
-          </div>
+          </Popover>
 
-          <div className='flex items-center py-1 hover:text-gray-300 cursor-pointer ml-6'>
+          <Popover
+            className='flex items-center py-1 hover:text-gray-300 cursor-pointer ml-6'
+            renderPopover={
+              <div>
+                <Link
+                  to={'/'}
+                  className='block py-2 px-4 hover:bg-slate-100 bg-white hover:text-cyan-500 w-full text-left'
+                >
+                  Tài khoản của tôi
+                </Link>
+                <Link
+                  to={'/'}
+                  className='block py-2 px-4 hover:bg-slate-100 bg-white hover:text-cyan-500 w-full  text-left'
+                >
+                  Đơn mua
+                </Link>
+                <button className='block py-2 px-4 hover:bg-slate-100 bg-white hover:text-cyan-500 w-full text-left'>
+                  Đăng xuất
+                </button>
+              </div>
+            }
+          >
             <div className='w-6 h-6 mr-2 flex-shrink-0'>
               <img
                 src='https://plus.unsplash.com/premium_photo-1744395627552-1349f5d80199?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
@@ -86,7 +74,7 @@ export default function Header() {
               />
             </div>
             <span className='mx-1'>Nguyễn Minh Quang</span>
-          </div>
+          </Popover>
         </div>
         <div className='grid grid-cols-12 gap-4 mt-4 items-end'>
           <Link to={'/'} className='col-span-2'>
