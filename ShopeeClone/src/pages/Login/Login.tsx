@@ -11,12 +11,13 @@ import Input from '../../components/Input'
 import { useContext } from 'react'
 import { AppContext } from '../../contexts/app.context'
 import Button from '../../components/Button'
+import path from '../../constants/path'
 
 type LoginFormData = Omit<FormData, 'confirm_password'>
 const schemaLogin = schema.omit(['confirm_password'])
 
 export default function Login() {
-  const { setIsAuthenticated } = useContext(AppContext)
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
   const navigate = useNavigate()
   const {
     register,
@@ -35,9 +36,11 @@ export default function Login() {
 
   const onSubmit = handleSubmit((data) => {
     loginAccountMutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsAuthenticated(true)
-        navigate('/')
+        setProfile(data.data.data.user)
+        console.log(data.data.data.user)
+        navigate(path.home)
       },
       onError: (error) => {
         if (isAxiosUnprocessableEntityError<ErrorResponse<LoginFormData>>(error)) {
