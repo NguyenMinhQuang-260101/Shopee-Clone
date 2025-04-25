@@ -11,6 +11,7 @@ import { isAxiosUnprocessableEntityError } from '../../utils/utils'
 import { ErrorResponse } from '../../types/utils.type'
 import { useContext } from 'react'
 import { AppContext } from '../../contexts/app.context'
+import Button from '../../components/Button'
 
 export default function Register() {
   const { setIsAuthenticated } = useContext(AppContext)
@@ -107,12 +108,14 @@ export default function Register() {
                 errorMessage={errors.confirm_password?.message}
               />
               <div className='mt-2'>
-                <button
+                <Button
                   type='submit'
                   className='w-full bg-orange text-white p-3 rounded-sm mt-4 hover:bg-orange/80 uppercase'
+                  isLoading={registerAccountMutation.isPending}
+                  disabled={registerAccountMutation.isPending}
                 >
                   đăng ký
-                </button>
+                </Button>
               </div>
               <div className='mt-7 flex items-center justify-center'>
                 <span className='text-gray-300'>Bạn đã có tài khoản?</span>

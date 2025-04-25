@@ -10,6 +10,7 @@ import { ErrorResponse } from '../../types/utils.type'
 import Input from '../../components/Input'
 import { useContext } from 'react'
 import { AppContext } from '../../contexts/app.context'
+import Button from '../../components/Button'
 
 type LoginFormData = Omit<FormData, 'confirm_password'>
 const schemaLogin = schema.omit(['confirm_password'])
@@ -81,12 +82,14 @@ export default function Login() {
                 errorMessage={errors.password?.message}
               />
               <div className='mt-3'>
-                <button
+                <Button
                   type='submit'
-                  className='w-full bg-orange text-white p-3 rounded-sm mt-4 hover:bg-orange/80 uppercase'
+                  className='w-full bg-orange text-white p-3 rounded-sm mt-4 hover:bg-orange/80 uppercase flex justify-center items-center'
+                  isLoading={loginAccountMutation.isPending}
+                  disabled={loginAccountMutation.isPending}
                 >
                   đăng nhập
-                </button>
+                </Button>
               </div>
               <div className='mt-8 flex items-center justify-center'>
                 <span className='text-gray-300'>Bạn chưa có tài khoản?</span>

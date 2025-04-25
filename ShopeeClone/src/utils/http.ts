@@ -7,7 +7,7 @@ class Http {
   instance: AxiosInstance
   private accessToken: string
   constructor() {
-    this.accessToken = getAccessTokenFromLS()
+    this.accessToken = getAccessTokenFromLS() //Nên khởi tao accessToken trong constructor vì lấy dữ liệu trong ram nhanh hơn
     this.instance = axios.create({
       baseURL: 'https://api-ecom.duthanhduoc.com/',
       timeout: 10000,
