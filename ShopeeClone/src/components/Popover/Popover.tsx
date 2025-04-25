@@ -1,4 +1,4 @@
-import { arrow, FloatingArrow, FloatingPortal, shift, useFloating } from '@floating-ui/react'
+import { arrow, FloatingArrow, FloatingPortal, shift, useFloating, Placement } from '@floating-ui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { useState } from 'react'
 
@@ -8,13 +8,22 @@ interface Props {
   className?: string
   as?: React.ElementType
   initialIsOpen?: boolean
+  placement?: Placement
 }
 
-export default function Popover({ children, className, renderPopover, as: Element = 'div', initialIsOpen }: Props) {
+export default function Popover({
+  children,
+  className,
+  renderPopover,
+  as: Element = 'div',
+  initialIsOpen,
+  placement
+}: Props) {
   const [isOpen, setIsOpen] = useState(initialIsOpen || false)
   const arrowRef = React.useRef<SVGSVGElement>(null)
   const { refs, floatingStyles, context, middlewareData } = useFloating({
-    middleware: [shift(), arrow({ element: arrowRef })]
+    middleware: [shift(), arrow({ element: arrowRef })],
+    placement: placement || 'bottom-end' // Default placement,
   })
   const showPopover = () => {
     setIsOpen(true)
