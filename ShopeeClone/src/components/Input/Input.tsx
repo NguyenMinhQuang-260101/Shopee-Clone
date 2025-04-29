@@ -1,15 +1,12 @@
 import { RegisterOptions, UseFormRegister } from 'react-hook-form'
 import { FormData } from '../../types/register.type'
 
-interface Props {
-  type: React.HTMLInputTypeAttribute
+interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string
-  placeholder?: string
-  className?: string
-  name: keyof FormData
-  register: UseFormRegister<FormData> | UseFormRegister<Omit<FormData, 'confirm_password'>>
+  classNameInput?: string
+  classNameError?: string
+  register?: UseFormRegister<any>
   rules?: RegisterOptions<FormData, keyof FormData>
-  autoComplete?: string
 }
 
 export default function Input({
@@ -20,18 +17,21 @@ export default function Input({
   name,
   register,
   rules,
-  autoComplete
+  autoComplete,
+  classNameInput = 'p-3 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md',
+  classNameError = 'mt-1 text-[#ff424f] min-h-[1.25rem] text-sm'
 }: Props) {
+  const registerResult = register && name ? register(name, rules) : {}
   return (
     <div className={className}>
       <input
         type={type}
-        className='p-3 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
+        className={classNameInput}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        {...(register as UseFormRegister<FormData>)(name, rules)}
+        {...registerResult}
       />
-      <div className='mt-1 text-[#ff424f] min-h-[1.25rem] text-sm'>{errorMessage}</div>
+      <div className={classNameError}>{errorMessage}</div>
     </div>
   )
 }
