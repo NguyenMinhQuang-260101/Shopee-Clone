@@ -10,6 +10,6 @@ const path = {
   orderDetail: '/order/:id',
   search: '/search',
   category: '/category/:id'
-}
+} as const
 
 export default path
