@@ -1,18 +1,58 @@
 import classNames from 'classnames'
-import { createSearchParams, Link } from 'react-router-dom'
+import { Controller, useForm } from 'react-hook-form'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button'
-import Input from '../../../components/Input'
+import InputNumber from '../../../components/InputNumber'
 import path from '../../../constants/path'
 import { Category } from '../../../types/category.type'
 import { QueryConfig } from '../ProductList'
-
+import { yupResolver } from '@hookform/resolvers/yup'
+import { NoUndefinedField } from '../../../types/utils.type'
+import { PriceSchemaType, priceSchema } from '../../../utils/rules'
 interface AsideFilterProps {
   queryConfig: QueryConfig
   categories: Category[]
 }
 
+/**
+ * * Rule validate:
+ * Nếu có price_min và price_max thì price_min <= price_max
+ * Còn không thì có price_min thì khong có price_max và ngược lại
+ */
+
+type FromData = NoUndefinedField<PriceSchemaType>
+
 export default function AsideFilter({ queryConfig, categories }: AsideFilterProps) {
   const { category } = queryConfig
+  const {
+    control,
+    handleSubmit,
+    trigger,
+    formState: { errors }
+  } = useForm<FromData>({
+    defaultValues: {
+      price_min: '',
+      price_max: ''
+    },
+    resolver: yupResolver(priceSchema),
+    // Nên có shouldFocusError khi dùng ref dể focus vào input lỗi tránh focus mặt định
+    shouldFocusError: false
+  })
+  const navigate = useNavigate()
+
+  const onSubmit = handleSubmit((data) => {
+    navigate({
+      pathname: path.home,
+      search: createSearchParams({
+        ...queryConfig,
+        price_min: data.price_min,
+        price_max: data.price_max
+      }).toString()
+    })
+  })
+
+  console.log(errors)
+
   return (
     <div className='py-4'>
       <Link
@@ -91,24 +131,51 @@ export default function AsideFilter({ queryConfig, categories }: AsideFilterProp
       <div className='my-4 h-[1px] bg-gray-300' />
       <div className='my-5'>
         <div>Khoảng Giá</div>
-        <form className='mt-2'>
+        <form className='mt-2' onSubmit={onSubmit}>
           <div className='flex items-start'>
-            <Input
-              type='text'
-              className='grow'
-              name='from'
-              placeholder='₫ TỪ'
-              classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
+            <Controller
+              control={control}
+              name='price_min'
+              render={(
+                { field } // Destructure the field object to get onChange and value
+              ) => (
+                <InputNumber
+                  type='text'
+                  className='grow'
+                  placeholder='₫ TỪ'
+                  classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
+                  {...field} // Spread the field object to pass all its properties to the input element
+                  onChange={(event) => {
+                    field.onChange(event)
+                    trigger('price_max') // Trigger validation for price_min field
+                  }}
+                  classNameError='hidden'
+                />
+              )}
             />
             <div className='mx-2 mt-2 shrink-0'>-</div>
-            <Input
-              type='text'
-              className='grow'
-              name='to'
-              placeholder='₫ ĐẾN'
-              classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
+            <Controller
+              control={control}
+              name='price_max'
+              render={(
+                { field } // Destructure the field object to get onChange and value
+              ) => (
+                <InputNumber
+                  type='text'
+                  className='grow'
+                  placeholder='₫ ĐẾN'
+                  classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
+                  {...field} // Spread the field object to pass all its properties to the input element
+                  onChange={(event) => {
+                    field.onChange(event)
+                    trigger('price_min') // Trigger validation for price_max field
+                  }}
+                  classNameError='hidden'
+                />
+              )}
             />
           </div>
+          <div className='mt-1 min-h-[1.25rem] text-center text-sm text-[#ff424f]'>{errors.price_min?.message}</div>
           <Button className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'>
             áp dụng
           </Button>

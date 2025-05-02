@@ -1,3 +1,3 @@
-import { Schema } from '../utils/rules'
+import { SchemaType } from '../utils/rules'
 
-export type FormData = Schema
+export type FormData = SchemaType

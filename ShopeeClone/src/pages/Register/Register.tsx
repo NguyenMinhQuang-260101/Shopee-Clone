@@ -1,8 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
-import { schema } from '../../utils/rules'
+import { registerSchema, SchemaType } from '../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { FormData } from '../../types/register.type'
 import Input from '../../components/Input'
 import { useMutation } from '@tanstack/react-query'
 import { omit } from 'lodash'
@@ -14,6 +13,8 @@ import { AppContext } from '../../contexts/app.context'
 import Button from '../../components/Button'
 import path from '../../constants/path'
 
+type RegisterFormData = Pick<SchemaType, 'email' | 'password' | 'confirm_password'>
+
 export default function Register() {
   const { setIsAuthenticated, setProfile } = useContext(AppContext)
   const navigate = useNavigate()
@@ -24,12 +25,12 @@ export default function Register() {
     // getValues,
     setError,
     formState: { errors }
-  } = useForm<FormData>({
-    resolver: yupResolver(schema)
+  } = useForm<RegisterFormData>({
+    resolver: yupResolver(registerSchema)
   })
 
   const registerAccountMutation = useMutation({
-    mutationFn: (body: Omit<FormData, 'confirm_password'>) => authApi.registerAccount(body)
+    mutationFn: (body: Omit<RegisterFormData, 'confirm_password'>) => authApi.registerAccount(body)
   })
 
   const onSubmit = handleSubmit((data) => {
@@ -45,11 +46,11 @@ export default function Register() {
         navigate(path.home)
       },
       onError: (error) => {
-        if (isAxiosUnprocessableEntityError<ErrorResponse<Omit<FormData, 'confirm_password'>>>(error)) {
+        if (isAxiosUnprocessableEntityError<ErrorResponse<Omit<RegisterFormData, 'confirm_password'>>>(error)) {
           const formError = error.response?.data.data
           // * Cách 1: Dùng forEach trong trường hợp có nhiều trường dữ liệu cần kiểm tra lỗi
           if (formError) {
-            const formErrorKeys = Object.keys(formError) as Array<keyof Omit<FormData, 'confirm_password'>>
+            const formErrorKeys = Object.keys(formError) as Array<keyof Omit<RegisterFormData, 'confirm_password'>>
             formErrorKeys.forEach((key) => {
               setError(key, {
                 message: formError[key],

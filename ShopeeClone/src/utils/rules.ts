@@ -51,6 +51,14 @@ export const rules: Rules = {
   }
 }
 
+function textPriceMinMax(this: yup.TestContext<yup.AnyObject>) {
+  const { price_min, price_max } = this.parent as { price_min: string; price_max: string } // Lấy giá trị của price_min và price_max từ context
+  if (price_min !== '' && price_max !== '') {
+    return Number(price_min) <= Number(price_max)
+  }
+  return price_min !== '' || price_max !== ''
+}
+
 export const schema = yup.object({
   email: yup
     .string()
@@ -66,13 +74,26 @@ export const schema = yup.object({
   confirm_password: yup
     .string()
     .required('Vui lòng nhập lại mật khẩu')
-    .oneOf([yup.ref('password')], 'Mật khẩu không khớp')
+    .oneOf([yup.ref('password')], 'Mật khẩu không khớp'),
+  price_min: yup.string().default('').test({
+    name: 'price-not-allowed',
+    message: 'Giá không phù hợp',
+    test: textPriceMinMax
+  }),
+  price_max: yup.string().default('').test({
+    name: 'price-not-allowed',
+    message: 'Giá không phù hợp',
+    test: textPriceMinMax
+  })
 })
 
-const loginSchema = schema.pick(['email', 'password'])
+export const loginSchema = schema.pick(['email', 'password'])
+export const registerSchema = schema.pick(['email', 'password', 'confirm_password'])
+export const priceSchema = schema.pick(['price_min', 'price_max'])
 
 // Có thể dùng Omit để loại bỏ các trường không cần thiết
 // const loginSchemaOmit = schema.omit(['confirm_password'])
 
-export type Schema = yup.InferType<typeof schema>
-export type LoginSchema = yup.InferType<typeof loginSchema>
+// export type LoginSchema = yup.InferType<typeof loginSchema>
+export type SchemaType = yup.InferType<typeof registerSchema>
+export type PriceSchemaType = yup.InferType<typeof priceSchema>
