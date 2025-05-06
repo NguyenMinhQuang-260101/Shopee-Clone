@@ -6,7 +6,7 @@ import ProductRating from '../../components/ProductRating'
 import { formatCurrency, formatNumberToSocialStyle, rateSale } from '../../utils/utils'
 import InputNumber from '../../components/InputNumber'
 import DOMPurify from 'dompurify' //! DOMPurify giúp ta làm sạch HTML, loại bỏ các thẻ độc hại như <script>, <iframe>, ...
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Product } from '../../types/product.type'
 
 export default function ProductDetail() {
@@ -18,6 +18,7 @@ export default function ProductDetail() {
     }
   })
   const product = productDetailData?.data.data
+  const imageRef = useRef<HTMLImageElement>(null)
   const [currentIndexImgs, setCurrentIndexImgs] = useState<number[]>([0, 5])
   const [activeImg, setActiveImg] = useState<string>('')
   const currentImgs = useMemo(
@@ -47,6 +48,33 @@ export default function ProductDetail() {
     }
   }
 
+  const handleZoomImg = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const image = imageRef.current as HTMLImageElement
+    const { naturalHeight, naturalWidth } = image
+    // * Cách 1: Lấy offsetX, offsetY dơn giản khi chúng ta ĐÃ xử lý được bubble event
+    // const { offsetX, offsetY } = event.nativeEvent
+
+    // * Cách 2: Lấy offsetX, offsetY phức tạp hơn một chút, chúng ta KHÔNG CẦN xử lý bubble event (KHÔNG cần thêm pointer-events-none vào ảnh)
+    const offsetX = event.pageX - (rect.x + window.scrollX)
+    const offsetY = event.pageY - (rect.y + window.scrollY)
+
+    const top = offsetY * (1 - naturalHeight / rect.height)
+    const left = offsetX * (1 - naturalWidth / rect.width)
+    image.style.width = naturalWidth + 'px'
+    image.style.height = naturalHeight + 'px'
+    image.style.maxWidth = 'unset'
+    image.style.top = top + 'px'
+    image.style.left = left + 'px'
+
+    // ! Event bubble dẫn đến việc zoom ảnh không chính xác bị chớp
+    // * Cách khắc phục: Thêm pointer-events-none vào ảnh để không cho sự kiện chuột xảy ra trên ảnh
+  }
+
+  const handleRemoveZoomImg = () => {
+    imageRef.current?.removeAttribute('style')
+  }
+
   if (!product) return null
 
   return (
@@ -55,11 +83,16 @@ export default function ProductDetail() {
         <div className='bg-white p-4 shadow'>
           <div className='grid grid-cols-12 gap-9'>
             <div className='col-span-5'>
-              <div className='relative w-full pt-[100%] shadow'>
+              <div
+                className='relative w-full overflow-hidden pt-[100%] shadow hover:cursor-zoom-in'
+                onMouseMove={handleZoomImg}
+                onMouseLeave={handleRemoveZoomImg}
+              >
                 <img
                   src={activeImg}
                   alt={product.name}
                   className='absolute left-0 top-0 h-full w-full bg-white object-cover'
+                  ref={imageRef}
                 />
               </div>
               <div className='relative mt-4 grid grid-cols-5'>
