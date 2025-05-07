@@ -11,7 +11,7 @@ import { priceSchema, PriceSchemaType } from '../../../../utils/rules'
 import path from '../../../../constants/path'
 import InputNumber from '../../../../components/InputNumber'
 import Button from '../../../../components/Button'
-import { QueryConfig } from '../../ProductList'
+import { QueryConfig } from '../../../../hooks/useQueryConfig'
 import { Category } from '../../../../types/category.type'
 interface AsideFilterProps {
   queryConfig: QueryConfig

@@ -1,13 +1,14 @@
 import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/solid'
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
-import ProductApi from '../../apis/product.api'
-import ProductRating from '../../components/ProductRating'
-import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
-import InputNumber from '../../components/InputNumber'
 import DOMPurify from 'dompurify' //! DOMPurify giúp ta làm sạch HTML, loại bỏ các thẻ độc hại như <script>, <iframe>, ...
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Product } from '../../types/product.type'
+import { useParams } from 'react-router-dom'
+import ProductApi from '../../apis/product.api'
+import InputNumber from '../../components/InputNumber'
+import ProductRating from '../../components/ProductRating'
+import { Product as ProductType, ProductListConfig } from '../../types/product.type'
+import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
+import Product from '../ProductList/components/Product'
 
 export default function ProductDetail() {
   const { nameId } = useParams()
@@ -26,6 +27,16 @@ export default function ProductDetail() {
     () => (product ? product.images.slice(...currentIndexImgs) : []),
     [product, currentIndexImgs]
   )
+  const queryConfig: ProductListConfig = { limit: '12', page: '1', category: product?.category._id }
+  const { data: productData } = useQuery({
+    queryKey: ['products', queryConfig],
+    queryFn: () => {
+      return ProductApi.getProducts(queryConfig)
+    },
+    staleTime: 3 * 60 * 1000, // 3 phút
+    enabled: Boolean(product) // Chỉ gọi API khi có product
+  })
+  console.log(productData)
 
   useEffect(() => {
     if (product && product.images.length > 0) {
@@ -38,7 +49,7 @@ export default function ProductDetail() {
   }
 
   const handleNextImg = () => {
-    if (currentIndexImgs[1] < (product as Product).images.length) {
+    if (currentIndexImgs[1] < (product as ProductType).images.length) {
       setCurrentIndexImgs((prev) => [prev[0] + 1, prev[1] + 1])
     }
   }
@@ -183,15 +194,31 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
-      <div className='container'>
-        <div className='mt-8 bg-white p-4 shadow'>
-          <div className='rounded bg-gray-50 p-4 text-lg uppercase text-slate-700'>Mô tả sản phẩm</div>
-          <div className='mx-4 mb-4 mt-10 text-sm leading-loose'>
-            <div
-              className='prose max-w-none'
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
-            />
+      <div className='mt-8'>
+        <div className='container'>
+          <div className='mt-8 bg-white p-4 shadow'>
+            <div className='rounded bg-gray-50 p-4 text-lg uppercase text-slate-700'>Mô tả sản phẩm</div>
+            <div className='mx-4 mb-4 mt-10 text-sm leading-loose'>
+              <div
+                className='prose max-w-none'
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
+              />
+            </div>
           </div>
+        </div>
+      </div>
+      <div className='mt-8'>
+        <div className='container'>
+          <div className='uppercase text-gray-400'>Có thể bạn cũng thích</div>
+          {productData && (
+            <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
+              {productData.data.data.products.map((product) => (
+                <div className='col-span-1' key={product._id}>
+                  <Product product={product} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
