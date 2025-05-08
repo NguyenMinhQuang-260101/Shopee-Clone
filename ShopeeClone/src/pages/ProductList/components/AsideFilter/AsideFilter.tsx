@@ -13,6 +13,7 @@ import InputNumber from '../../../../components/InputNumber'
 import Button from '../../../../components/Button'
 import { QueryConfig } from '../../../../hooks/useQueryConfig'
 import { Category } from '../../../../types/category.type'
+import InputV2 from '../../../../components/InputV2'
 interface AsideFilterProps {
   queryConfig: QueryConfig
   categories: Category[]
@@ -142,7 +143,7 @@ export default function AsideFilter({ queryConfig, categories }: AsideFilterProp
         <div>Khoảng Giá</div>
         <form className='mt-2' onSubmit={onSubmit}>
           <div className='flex items-start'>
-            <Controller
+            {/* <Controller
               control={control}
               name='price_min'
               render={(
@@ -161,6 +162,18 @@ export default function AsideFilter({ queryConfig, categories }: AsideFilterProp
                   classNameError='hidden'
                 />
               )}
+            /> */}
+            <InputV2
+              control={control}
+              name='price_min'
+              type='number'
+              className='grow'
+              placeholder='₫ TỪ'
+              classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-md'
+              onChange={() => {
+                trigger('price_max') // Trigger validation for price_min field
+              }}
+              classNameError='hidden'
             />
             <div className='mx-2 mt-2 shrink-0'>-</div>
             <Controller
