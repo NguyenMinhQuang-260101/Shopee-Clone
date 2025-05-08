@@ -1,16 +1,17 @@
-import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import { useQuery } from '@tanstack/react-query'
 import DOMPurify from 'dompurify' //! DOMPurify giúp ta làm sạch HTML, loại bỏ các thẻ độc hại như <script>, <iframe>, ...
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProductApi from '../../apis/product.api'
-import InputNumber from '../../components/InputNumber'
 import ProductRating from '../../components/ProductRating'
-import { Product as ProductType, ProductListConfig } from '../../types/product.type'
+import QuantityController from '../../components/QuantityController'
+import { ProductListConfig, Product as ProductType } from '../../types/product.type'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
 import Product from '../ProductList/components/Product'
 
 export default function ProductDetail() {
+  const [buyCount, setBuyCount] = useState(1)
   const { nameId } = useParams()
   const id = getIdFromNameId(nameId as string) // Lấy id từ nameId
   const { data: productDetailData } = useQuery({
@@ -87,6 +88,10 @@ export default function ProductDetail() {
     imageRef.current?.removeAttribute('style')
   }
 
+  const handleBuyCount = (value: number) => {
+    setBuyCount(value)
+  }
+
   if (!product) return null
 
   return (
@@ -161,20 +166,13 @@ export default function ProductDetail() {
               </div>
               <div className='mt-8 flex items-center'>
                 <div className='capitalize text-gray-500'>Sô lượng</div>
-                <div className='ml-10 flex items-center'>
-                  <button className='flex h-8 w-8 items-center justify-center rounded-l-sm border border-gray-300 text-gray-600'>
-                    <MinusIcon className='h-4 w-4' />
-                  </button>
-                  <InputNumber
-                    value={1}
-                    className=''
-                    classNameError='hidden'
-                    classNameInput='h-8 w-14 border-t border-b border-gray-300 p-1 text-center outline-none'
-                  />
-                  <button className='flex h-8 w-8 items-center justify-center rounded-r-sm border border-gray-300 text-gray-600'>
-                    <PlusIcon className='h-4 w-4' />
-                  </button>
-                </div>
+                <QuantityController
+                  onDecrease={handleBuyCount}
+                  onIncrease={handleBuyCount}
+                  onType={handleBuyCount}
+                  value={buyCount}
+                  max={product.quantity}
+                />
                 <div className='ml-6 text-sm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className='mt-8 flex items-center'>
