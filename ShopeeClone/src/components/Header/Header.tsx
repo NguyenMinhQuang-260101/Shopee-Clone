@@ -1,15 +1,21 @@
-import { createSearchParams, Link, useNavigate } from 'react-router-dom'
-import Popover from '../Popover'
-import { useMutation } from '@tanstack/react-query'
-import authApi from '../../apis/auth.api'
-import { useContext } from 'react'
-import { AppContext } from '../../contexts/app.context'
-import path from '../../constants/path'
-import useQueryConfig from '../../hooks/useQueryConfig'
-import { useForm } from 'react-hook-form'
-import { searchSchema, SearchSchemaType } from '../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { omit } from 'lodash'
+import { useContext } from 'react'
+import { useForm } from 'react-hook-form'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
+import authApi from '../../apis/auth.api'
+import purchaseApi from '../../apis/purchase.api'
+import noProductImage from '../../assets/images/no-product.png'
+import path from '../../constants/path'
+import { purchasesStatus } from '../../constants/purchaseStatus'
+import { AppContext } from '../../contexts/app.context'
+import useQueryConfig from '../../hooks/useQueryConfig'
+import { searchSchema, SearchSchemaType } from '../../utils/rules'
+import { formatCurrency } from '../../utils/utils'
+import Popover from '../Popover'
+
+const MAX_PURCHASE_IN_CART = 5
 
 export default function Header() {
   const queryConfig = useQueryConfig()
@@ -34,8 +40,19 @@ export default function Header() {
     logoutMutation.mutate()
   }
 
+  // Khi chúng ta chuyển trang thì Header chỉ bị re-render
+  // Chứ không bị unmount - mounting again
+  // (Tất nhiên là trừ trường hợp logout rồi nhảy sang RegisterLayout rồi nhảy vào lại)
+  // Nên các query này sẽ không bị inactive => Không bị gọi lại => không cần thiết phải set stale: Infinity
+
+  const { data: purchasesInCartData } = useQuery({
+    queryKey: ['purchases', { status: purchasesStatus.inCart }],
+    queryFn: () => purchaseApi.getPurchaseList({ status: purchasesStatus.inCart })
+  })
+
+  const purchasesInCart = purchasesInCartData?.data.data
+
   const onSubmitSearch = handleSubmit((data) => {
-    // console.log(data)
     const config = queryConfig.order
       ? omit(
           {
@@ -181,107 +198,51 @@ export default function Header() {
             <Popover
               // placement='bottom-end'
               renderPopover={
-                <div className='max-w-[400px] text-sm'>
-                  <div className='p-2'>
-                    <div className='capitalize text-gray-400'>Sản phẩm mới thêm</div>
-                    <div className='mt-5'>
-                      <div className='mt-4 flex'>
-                        <div className='flex-shrink-0'>
-                          <img
-                            src='https://images.unsplash.com/photo-1745330612709-74ad3afdfe00?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                            alt='anh'
-                            className='h-11 w-11 object-cover'
-                          />
-                        </div>
-                        <div className='ml-2 flex-grow overflow-hidden'>
-                          <div className='truncate'>
-                            [ 10 Túi 100 Cái ] Khẩu Trang 5D 3 Lớp Chống Bụi Chống Tia UV Kháng Khuẩn
+                <div className='relative max-w-[400px] rounded-sm border border-gray-200 bg-white text-sm shadow-md'>
+                  {purchasesInCart ? (
+                    <div className='p-2'>
+                      <div className='capitalize text-gray-400'>Sản phẩm mới thêm</div>
+                      <div className='mt-5'>
+                        {purchasesInCart.slice(0, 5).map((purchase) => (
+                          <div className='mt-2 flex py-2 hover:bg-gray-100' key={purchase._id}>
+                            <div className='flex-shrink-0'>
+                              <img
+                                src={purchase.product.image}
+                                alt={purchase.product.name}
+                                className='h-11 w-11 object-cover'
+                              />
+                            </div>
+                            <div className='ml-2 flex-grow overflow-hidden'>
+                              <div className='truncate'>{purchase.product?.name}</div>
+                            </div>
+                            <div className='ml-2 flex-shrink-0'>
+                              <span className='text-orange'>đ{formatCurrency(purchase.product.price)}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className='ml-2 flex-shrink-0'>
-                          <span className='text-orange'>đ469.000</span>
-                        </div>
+                        ))}
                       </div>
-                      <div className='mt-4 flex'>
-                        <div className='flex-shrink-0'>
-                          <img
-                            src='https://images.unsplash.com/photo-1745330612709-74ad3afdfe00?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                            alt='anh'
-                            className='h-11 w-11 object-cover'
-                          />
+                      <div className='mt-6 flex items-center justify-between'>
+                        <div className='text-xs capitalize text-gray-500'>
+                          {purchasesInCart.length > MAX_PURCHASE_IN_CART
+                            ? purchasesInCart.length - MAX_PURCHASE_IN_CART
+                            : ''}{' '}
+                          thêm vào giỏ hàng
                         </div>
-                        <div className='ml-2 flex-grow overflow-hidden'>
-                          <div className='truncate'>
-                            [ 10 Túi 100 Cái ] Khẩu Trang 5D 3 Lớp Chống Bụi Chống Tia UV Kháng Khuẩn
-                          </div>
-                        </div>
-                        <div className='ml-2 flex-shrink-0'>
-                          <span className='text-orange'>đ469.000</span>
-                        </div>
-                      </div>
-                      <div className='mt-4 flex'>
-                        <div className='flex-shrink-0'>
-                          <img
-                            src='https://images.unsplash.com/photo-1745330612709-74ad3afdfe00?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                            alt='anh'
-                            className='h-11 w-11 object-cover'
-                          />
-                        </div>
-                        <div className='ml-2 flex-grow overflow-hidden'>
-                          <div className='truncate'>
-                            [ 10 Túi 100 Cái ] Khẩu Trang 5D 3 Lớp Chống Bụi Chống Tia UV Kháng Khuẩn
-                          </div>
-                        </div>
-                        <div className='ml-2 flex-shrink-0'>
-                          <span className='text-orange'>đ469.000</span>
-                        </div>
-                      </div>
-                      <div className='mt-4 flex'>
-                        <div className='flex-shrink-0'>
-                          <img
-                            src='https://images.unsplash.com/photo-1745330612709-74ad3afdfe00?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                            alt='anh'
-                            className='h-11 w-11 object-cover'
-                          />
-                        </div>
-                        <div className='ml-2 flex-grow overflow-hidden'>
-                          <div className='truncate'>
-                            [ 10 Túi 100 Cái ] Khẩu Trang 5D 3 Lớp Chống Bụi Chống Tia UV Kháng Khuẩn
-                          </div>
-                        </div>
-                        <div className='ml-2 flex-shrink-0'>
-                          <span className='text-orange'>đ469.000</span>
-                        </div>
-                      </div>
-                      <div className='mt-4 flex'>
-                        <div className='flex-shrink-0'>
-                          <img
-                            src='https://images.unsplash.com/photo-1745330612709-74ad3afdfe00?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                            alt='anh'
-                            className='h-11 w-11 object-cover'
-                          />
-                        </div>
-                        <div className='ml-2 flex-grow overflow-hidden'>
-                          <div className='truncate'>
-                            [ 10 Túi 100 Cái ] Khẩu Trang 5D 3 Lớp Chống Bụi Chống Tia UV Kháng Khuẩn
-                          </div>
-                        </div>
-                        <div className='ml-2 flex-shrink-0'>
-                          <span className='text-orange'>đ469.000</span>
-                        </div>
+                        <button className='rounded-sm bg-orange px-4 py-2 capitalize text-white hover:bg-opacity-80'>
+                          xem giỏ hàng
+                        </button>
                       </div>
                     </div>
-                    <div className='mt-6 flex items-center justify-between'>
-                      <div className='text-xs capitalize text-gray-500'>1 thêm vào giỏ hàng</div>
-                      <button className='rounded-sm bg-orange px-4 py-2 capitalize text-white hover:bg-opacity-80'>
-                        xem giỏ hàng
-                      </button>
+                  ) : (
+                    <div className='flex h-[300px] w-[300px] flex-col items-center justify-center p-2'>
+                      <img src={noProductImage} alt='no purchase' className='h-24 w-24' />
+                      <div className='mt-3 capitalize text-gray-900'>chưa có sản phẩm</div>
                     </div>
-                  </div>
+                  )}
                 </div>
               }
             >
-              <Link to={'/'}>
+              <Link to={'/'} className='relative'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   fill='none'
@@ -296,6 +257,9 @@ export default function Header() {
                     d='M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z'
                   />
                 </svg>
+                <span className='absolute left-[17px] top-[-5px] rounded-full bg-white px-[9px] py-[1px] text-xs text-orange/90'>
+                  {purchasesInCart?.length}
+                </span>
               </Link>
             </Popover>
           </div>

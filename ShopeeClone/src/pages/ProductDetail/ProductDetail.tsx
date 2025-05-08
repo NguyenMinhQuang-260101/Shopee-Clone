@@ -1,17 +1,21 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import DOMPurify from 'dompurify' //! DOMPurify giúp ta làm sạch HTML, loại bỏ các thẻ độc hại như <script>, <iframe>, ...
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProductApi from '../../apis/product.api'
+import purchaseApi from '../../apis/purchase.api'
 import ProductRating from '../../components/ProductRating'
 import QuantityController from '../../components/QuantityController'
 import { ProductListConfig, Product as ProductType } from '../../types/product.type'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
 import Product from '../ProductList/components/Product'
+import { purchasesStatus } from '../../constants/purchaseStatus'
+import { toast } from 'react-toastify'
 
 export default function ProductDetail() {
   const [buyCount, setBuyCount] = useState(1)
+  const queryClient = useQueryClient()
   const { nameId } = useParams()
   const id = getIdFromNameId(nameId as string) // Lấy id từ nameId
   const { data: productDetailData } = useQuery({
@@ -37,8 +41,11 @@ export default function ProductDetail() {
     staleTime: 3 * 60 * 1000, // 3 phút
     enabled: Boolean(product) // Chỉ gọi API khi có product
   })
-  console.log(productData)
 
+  // ! const addToCartMutation = useMutation(purchaseApi.addToCart) : Cái này sai vì useMutation nhận vào 1 object chứ không phải là 1 function
+  const addToCartMutation = useMutation({
+    mutationFn: purchaseApi.addToCart
+  })
   useEffect(() => {
     if (product && product.images.length > 0) {
       setActiveImg(product.images[0])
@@ -90,6 +97,18 @@ export default function ProductDetail() {
 
   const handleBuyCount = (value: number) => {
     setBuyCount(value)
+  }
+
+  const addToCart = () => {
+    addToCartMutation.mutate(
+      { buy_count: buyCount, product_id: product?._id as string },
+      {
+        onSuccess: (data) => {
+          toast.success(data.data.message, { autoClose: 3000 })
+          queryClient.invalidateQueries({ queryKey: ['purchases', { status: purchasesStatus.inCart }] }) // Xóa cache của danh sách giỏ hàng
+        }
+      }
+    )
   }
 
   if (!product) return null
@@ -176,7 +195,10 @@ export default function ProductDetail() {
                 <div className='ml-6 text-sm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className='mt-8 flex items-center'>
-                <button className='flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize text-orange shadow-sm hover:bg-orange/5'>
+                <button
+                  className='flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize text-orange shadow-sm hover:bg-orange/5'
+                  onClick={addToCart}
+                >
                   <img
                     alt='icon-add-to-cart'
                     className='mr-[10px] h-5 fill-current stroke-orange text-orange'
@@ -211,7 +233,11 @@ export default function ProductDetail() {
           {productData && (
             <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
               {productData.data.data.products.map((product) => (
-                <div className='col-span-1' key={product._id}>
+                <div
+                  className='col-span-1'
+                  key={product._id}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                >
                   <Product product={product} />
                 </div>
               ))}
