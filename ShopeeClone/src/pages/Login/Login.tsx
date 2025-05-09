@@ -37,7 +37,6 @@ export default function Login() {
       onSuccess: (data) => {
         setIsAuthenticated(true)
         setProfile(data.data.data.user)
-        console.log(data.data.data.user)
         navigate(path.home)
       },
       onError: (error) => {
