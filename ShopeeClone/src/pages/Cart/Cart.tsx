@@ -56,7 +56,6 @@ export default function Cart() {
     if (purchasesInCart) {
       setExtendedPurchases((prev) => {
         const extendedPurchasesObject = keyBy(prev, '_id')
-        console.log(extendedPurchasesObject)
         return purchasesInCart.map((purchase) => ({
           ...purchase,
           disabled: false,
@@ -180,7 +179,7 @@ export default function Cart() {
                             </Link>
                             <div className='flex-grow px-2 pb-2 pt-1'>
                               <Link
-                                className='line-clamp-2'
+                                className='line-clamp-2 text-left'
                                 to={`${path.home}${generateNameId({ name: purchase.product.name, id: purchase.product._id })}`}
                               >
                                 {purchase.product.name}
