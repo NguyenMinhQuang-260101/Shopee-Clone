@@ -2,7 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import DOMPurify from 'dompurify' //! DOMPurify giúp ta làm sạch HTML, loại bỏ các thẻ độc hại như <script>, <iframe>, ...
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import ProductApi from '../../apis/product.api'
 import purchaseApi from '../../apis/purchase.api'
 import ProductRating from '../../components/ProductRating'
@@ -12,6 +12,7 @@ import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } 
 import Product from '../ProductList/components/Product'
 import { purchasesStatus } from '../../constants/purchaseStatus'
 import { toast } from 'react-toastify'
+import path from '../../constants/path'
 
 export default function ProductDetail() {
   const [buyCount, setBuyCount] = useState(1)
@@ -46,6 +47,8 @@ export default function ProductDetail() {
   const addToCartMutation = useMutation({
     mutationFn: purchaseApi.addToCart
   })
+  const navigate = useNavigate()
+
   useEffect(() => {
     if (product && product.images.length > 0) {
       setActiveImg(product.images[0])
@@ -111,6 +114,16 @@ export default function ProductDetail() {
     )
   }
 
+  const handleBuyNow = async () => {
+    const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
+    const purchase = res.data.data
+    navigate(path.cart, {
+      state: {
+        purchaseId: purchase._id
+      }
+    })
+  }
+
   if (!product) return null
 
   return (
@@ -125,7 +138,7 @@ export default function ProductDetail() {
                 onMouseLeave={handleRemoveZoomImg}
               >
                 <img
-                  src={activeImg}
+                  src={activeImg ? activeImg : undefined}
                   alt={product.name}
                   className='absolute left-0 top-0 h-full w-full bg-white object-cover'
                   ref={imageRef}
@@ -206,7 +219,10 @@ export default function ProductDetail() {
                   />
                   Thêm vào giỏ hàng
                 </button>
-                <button className='ml-4 flex h-12 min-w-20 items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'>
+                <button
+                  className='ml-4 flex h-12 min-w-20 items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
+                  onClick={handleBuyNow}
+                >
                   Mua ngay
                 </button>
               </div>
