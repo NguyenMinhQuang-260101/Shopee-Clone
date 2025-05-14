@@ -51,6 +51,9 @@ class Http {
           const message = (error.response?.data as { message?: string })?.message || error.message
           toast.error(message)
         }
+        if (error.response?.status === HttpStatusCode.Unauthorized) {
+          clearLocalStorage()
+        }
         return Promise.reject(error)
       }
     )
