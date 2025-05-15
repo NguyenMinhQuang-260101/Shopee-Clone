@@ -1,19 +1,41 @@
 import { Link } from 'react-router-dom'
 import path from '../../../../constants/path'
+import { useContext, useEffect, useState } from 'react'
+import { AppContext } from '../../../../contexts/app.context'
+import userImage from '../../../../assets/images/user.svg'
+
+const checkImage = (url: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(true) // Ảnh load thành công
+    img.onerror = () => resolve(false) // Ảnh bị lỗi (404, lỗi mạng...)
+    img.src = url
+  })
+}
 
 export default function UserSideNav() {
+  const { profile } = useContext(AppContext)
+  const [avatarSrc, setAvatarSrc] = useState(userImage)
+
+  useEffect(() => {
+    const loadAvatar = async () => {
+      if (profile?.avatar) {
+        const isValid = await checkImage(profile.avatar)
+        if (isValid) {
+          setAvatarSrc(profile.avatar)
+        }
+      }
+    }
+    loadAvatar()
+  }, [profile])
   return (
     <div>
       <div className='flex items-center border-b border-b-gray-200 py-4'>
         <Link to={path.profile} className='h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-black/10'>
-          <img
-            src='https://plus.unsplash.com/premium_photo-1744395627552-1349f5d80199?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-            alt='avatar'
-            className='h-full w-full object-cover'
-          />
+          <img src={avatarSrc} alt='avatar' className='h-full w-full object-cover' />
         </Link>
-        <div className='flex-grow pl-4'>
-          <div className='mv-1 truncate font-semibold text-gray-600'>quang.mnguyen</div>
+        <div className='w-[5px] flex-grow pl-4'>
+          <div className='mv-1 truncate font-semibold text-gray-600'>{profile?.email}</div>
           <Link to={path.profile} className='flex items-center capitalize text-gray-500'>
             <svg
               width={12}

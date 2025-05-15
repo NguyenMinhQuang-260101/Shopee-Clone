@@ -20,9 +20,24 @@ export default function DateSelect({ onChange, value, errorMessage }: Props) {
     year: value?.getFullYear() || 1990
   })
 
+  React.useEffect(() => {
+    if (value) {
+      setDate({
+        date: value.getDate(),
+        month: value.getMonth(),
+        year: value.getFullYear()
+      })
+    }
+  }, [value])
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value, name } = e.target
-    const newDate = { ...date, [name]: Number(value) }
+    const { value: valueFromSelect, name } = e.target
+    const newDate = {
+      date: value?.getDate() || date.date,
+      month: value?.getMonth() || date.month,
+      year: value?.getFullYear() || date.year,
+      [name]: Number(valueFromSelect)
+    }
     setDate(newDate)
     onChange && onChange(new Date(newDate.year as number, newDate.month as number, newDate.date as number))
   }
@@ -35,7 +50,7 @@ export default function DateSelect({ onChange, value, errorMessage }: Props) {
           <select
             className='h-10 w-[32%] cursor-pointer rounded-sm border border-black/10 px-3 hover:border-orange'
             name='date'
-            value={(date.date as number) || value?.getDate()}
+            value={date.date as number}
             onChange={handleChange}
           >
             <option disabled>Ngày</option>
@@ -48,7 +63,7 @@ export default function DateSelect({ onChange, value, errorMessage }: Props) {
           <select
             className='h-10 w-[32%] cursor-pointer rounded-sm border border-black/10 px-3 hover:border-orange'
             name='month'
-            value={(date.month as number) || value?.getMonth()}
+            value={date.month as number}
             onChange={handleChange}
           >
             <option disabled>Tháng</option>
@@ -61,7 +76,7 @@ export default function DateSelect({ onChange, value, errorMessage }: Props) {
           <select
             className='h-10 w-[32%] cursor-pointer rounded-sm border border-black/10 px-3 hover:border-orange'
             name='year'
-            value={(date.year as number) || value?.getFullYear()}
+            value={date.year as number}
             onChange={handleChange}
           >
             <option disabled>Năm</option>

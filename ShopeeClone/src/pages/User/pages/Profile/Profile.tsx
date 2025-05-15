@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import userApi from '../../../../apis/user.api'
 import Button from '../../../../components/Button'
@@ -8,10 +8,14 @@ import Input from '../../../../components/Input'
 import InputNumber from '../../../../components/InputNumber'
 import { userSchema } from '../../../../utils/rules'
 import DateSelect from '../../components/DateSelect'
+import { toast } from 'react-toastify'
+import { AppContext } from '../../../../contexts/app.context'
+import { setProfileFromLS } from '../../../../utils/auth'
 
 const profileSchema = userSchema.pick(['name', 'phone', 'address', 'avatar', 'date_of_birth'])
 
 export default function Profile() {
+  const { setProfile } = useContext(AppContext)
   const {
     register,
     formState: { errors },
@@ -28,7 +32,7 @@ export default function Profile() {
     },
     resolver: yupResolver(profileSchema)
   })
-  const { data: profileData } = useQuery({
+  const { data: profileData, refetch } = useQuery({
     queryKey: ['profile'],
     queryFn: userApi.getProfile
   })
@@ -36,6 +40,7 @@ export default function Profile() {
   const updateProfileMutation = useMutation({
     mutationFn: userApi.updateProfile
   })
+
   useEffect(() => {
     if (profile) {
       setValue('name', profile.name)
@@ -47,7 +52,14 @@ export default function Profile() {
   }, [profile, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data)
+    const res = await updateProfileMutation.mutateAsync({
+      ...data,
+      date_of_birth: data.date_of_birth?.toISOString()
+    })
+    setProfile(res.data.data)
+    setProfileFromLS(res.data.data)
+    refetch()
+    toast.success(res.data.message)
   })
 
   return (
@@ -113,12 +125,12 @@ export default function Profile() {
               <DateSelect errorMessage={errors.date_of_birth?.message} value={field.value} onChange={field.onChange} />
             )}
           />
-          <div className='mt-2 flex flex-col flex-wrap sm:flex-row'>
+          <div className='mt-6 flex flex-col flex-wrap sm:flex-row'>
             <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right' />
             <div className='sm:w-[80%] sm:pl-5'>
               <Button
                 type='submit'
-                className='flex h-9 items-center bg-orange px-5 text-center text-sm text-white hover:bg-orange/80'
+                className='flex h-9 items-center rounded-sm bg-orange px-5 text-center text-sm text-white hover:bg-orange/80'
               >
                 Lưu
               </Button>
