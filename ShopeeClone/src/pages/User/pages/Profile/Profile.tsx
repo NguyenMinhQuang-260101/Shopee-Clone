@@ -1,11 +1,12 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import userApi from '../../../../apis/user.api'
 import Button from '../../../../components/Button'
 import Input from '../../../../components/Input'
+import InputFile from '../../../../components/InputFile'
 import InputNumber from '../../../../components/InputNumber'
 import { AppContext } from '../../../../contexts/app.context'
 import { ErrorResponse } from '../../../../types/utils.type'
@@ -13,7 +14,6 @@ import { setProfileFromLS } from '../../../../utils/auth'
 import { profileSchema, UserSchemaType } from '../../../../utils/rules'
 import { getAvatarUrl, isAxiosUnprocessableEntityError } from '../../../../utils/utils'
 import DateSelect from '../../components/DateSelect'
-import config from '../../../../constants/config'
 
 type FormData = Pick<UserSchemaType, 'name' | 'address' | 'phone' | 'date_of_birth' | 'avatar'>
 type FormDataError = Omit<FormData, 'date_of_birth'> & {
@@ -29,7 +29,6 @@ type FormDataError = Omit<FormData, 'date_of_birth'> & {
 // Nhấn submit thì tiến hành upload lên server, nếu upload thành công thì tiến hành gọi api updateProfile
 
 export default function Profile() {
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { setProfile } = useContext(AppContext)
   const [file, setFile] = useState<File>()
   const previewImage = useMemo(() => {
@@ -115,20 +114,9 @@ export default function Profile() {
       }
     }
   })
-  const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const fileFromLocal = event.target.files?.[0]
-    if (fileFromLocal && (fileFromLocal.size >= config.maxSizeUploadAvatar || !fileFromLocal.type.includes('image'))) {
-      toast.error('Dung lượng file tối đa 1 MB. Định dạng: .JPEG, .PNG', {
-        autoClose: 1000,
-        position: 'top-center'
-      })
-      return
-    }
-    setFile(fileFromLocal)
-  }
 
-  const handleUpload = () => {
-    fileInputRef.current?.click()
+  const handleChangeFile = (file?: File) => {
+    setFile(file)
   }
 
   return (
@@ -215,27 +203,7 @@ export default function Profile() {
                 className='h-full w-full rounded-full object-cover'
               />
             </div>
-            <input
-              type='file'
-              className='hidden'
-              accept='.jpg,.jpeg,.png'
-              ref={fileInputRef}
-              onChange={onFileChange}
-              onClick={(event) => {
-                // * Cách 1:
-                event.currentTarget.value = ''
-                // * Cách 2:
-                // const target = event.target as HTMLInputElement
-                // target.value = ''
-              }}
-            />
-            <button
-              type='button'
-              className='flex h-10 items-center justify-end rounded-sm border bg-white px-6 text-sm text-gray-600 shadow-sm'
-              onClick={handleUpload}
-            >
-              Chọn ảnh
-            </button>
+            <InputFile onChange={handleChangeFile} />
             <div className='mt-3 text-gray-400'>
               <div>Dung lượng file tối đa 1 MB</div>
               <div>Định dạng: .JPEG, .PNG</div>
