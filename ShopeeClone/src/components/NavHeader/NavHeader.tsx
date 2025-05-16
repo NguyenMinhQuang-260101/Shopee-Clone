@@ -5,8 +5,8 @@ import authApi from '../../apis/auth.api'
 import path from '../../constants/path'
 import { purchasesStatus } from '../../constants/purchaseStatus'
 import { AppContext } from '../../contexts/app.context'
+import { getAvatarUrl } from '../../utils/utils'
 import Popover from '../Popover'
-import userImage from '../../assets/images/user.svg'
 
 export default function NavHeader() {
   const { setIsAuthenticated, isAuthenticated, setProfile, profile } = useContext(AppContext)
@@ -92,7 +92,7 @@ export default function NavHeader() {
         >
           <div className='mr-2 h-6 w-6 flex-shrink-0'>
             <img
-              src={profile?.avatar || userImage}
+              src={getAvatarUrl(profile?.avatar)}
               alt='avatar'
               className='h-full w-full rounded-full bg-current object-cover'
             />

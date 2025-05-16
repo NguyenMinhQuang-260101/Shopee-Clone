@@ -1,4 +1,6 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios'
+import config from '../constants/config'
+import userImage from '../assets/images/user.svg'
 
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   return axios.isAxiosError(error)
@@ -31,4 +33,15 @@ export const generateNameId = ({ name, id }: { name: string; id: string }) => {
 export const getIdFromNameId = (nameId: string) => {
   const arr = nameId.split('-i.')
   return arr[arr.length - 1]
+}
+
+// * Dùng trong trường hợp server trả về avatar chỉ có tên
+// * Còn nếu server trả về url thì không cần dùng hàm này3
+export const getAvatarUrl = (avatarName?: string) => {
+  if (avatarName) {
+    if (!avatarName.includes(config.baseUrl)) {
+      return `${config.baseUrl}images/${avatarName}`
+    } else return avatarName
+  }
+  return userImage
 }

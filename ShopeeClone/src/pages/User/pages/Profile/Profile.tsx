@@ -1,27 +1,52 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import userApi from '../../../../apis/user.api'
 import Button from '../../../../components/Button'
 import Input from '../../../../components/Input'
 import InputNumber from '../../../../components/InputNumber'
-import { userSchema } from '../../../../utils/rules'
-import DateSelect from '../../components/DateSelect'
-import { toast } from 'react-toastify'
 import { AppContext } from '../../../../contexts/app.context'
+import { ErrorResponse } from '../../../../types/utils.type'
 import { setProfileFromLS } from '../../../../utils/auth'
+import { profileSchema, UserSchemaType } from '../../../../utils/rules'
+import { getAvatarUrl, isAxiosUnprocessableEntityError } from '../../../../utils/utils'
+import DateSelect from '../../components/DateSelect'
+import config from '../../../../constants/config'
 
-const profileSchema = userSchema.pick(['name', 'phone', 'address', 'avatar', 'date_of_birth'])
+type FormData = Pick<UserSchemaType, 'name' | 'address' | 'phone' | 'date_of_birth' | 'avatar'>
+type FormDataError = Omit<FormData, 'date_of_birth'> & {
+  date_of_birth?: string
+}
+
+// Flow 1:
+// Nhấn upload: upload lên server luôn => server trả về url ảnh
+// Nhấn submit thì gửi url ảnh cộng với data lên server
+
+// Flow 2:
+// Nhấn upload: không upload lên server
+// Nhấn submit thì tiến hành upload lên server, nếu upload thành công thì tiến hành gọi api updateProfile
 
 export default function Profile() {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { setProfile } = useContext(AppContext)
+  const [file, setFile] = useState<File>()
+  const previewImage = useMemo(() => {
+    if (file) {
+      return URL.createObjectURL(file)
+    }
+    return ''
+  }, [file])
+
   const {
     register,
     formState: { errors },
     setValue,
     control,
-    handleSubmit
+    handleSubmit,
+    watch,
+    setError
   } = useForm({
     defaultValues: {
       name: '',
@@ -32,6 +57,7 @@ export default function Profile() {
     },
     resolver: yupResolver(profileSchema)
   })
+  const avatar = watch('avatar')
   const { data: profileData, refetch } = useQuery({
     queryKey: ['profile'],
     queryFn: userApi.getProfile
@@ -39,6 +65,9 @@ export default function Profile() {
   const profile = profileData?.data.data
   const updateProfileMutation = useMutation({
     mutationFn: userApi.updateProfile
+  })
+  const updateAvatarMutation = useMutation({
+    mutationFn: userApi.uploadAvatar
   })
 
   useEffect(() => {
@@ -52,15 +81,55 @@ export default function Profile() {
   }, [profile, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
-    const res = await updateProfileMutation.mutateAsync({
-      ...data,
-      date_of_birth: data.date_of_birth?.toISOString()
-    })
-    setProfile(res.data.data)
-    setProfileFromLS(res.data.data)
-    refetch()
-    toast.success(res.data.message)
+    try {
+      let avatarName = avatar
+      if (file) {
+        const form = new FormData()
+        form.append('image', file)
+        const uploadRes = await updateAvatarMutation.mutateAsync(form)
+        avatarName = uploadRes.data.data
+        setValue('avatar', avatarName)
+      }
+      const res = await updateProfileMutation.mutateAsync({
+        ...data,
+        date_of_birth: data.date_of_birth?.toISOString(),
+        avatar: avatarName
+      })
+      setProfile(res.data.data)
+      setProfileFromLS(res.data.data)
+      refetch()
+      toast.success(res.data.message)
+    } catch (error) {
+      if (isAxiosUnprocessableEntityError<ErrorResponse<FormDataError>>(error)) {
+        const formError = error.response?.data.data
+        // * Cách 1: Dùng forEach trong trường hợp có nhiều trường dữ liệu cần kiểm tra lỗi
+        if (formError) {
+          const formErrorKeys = Object.keys(formError)
+          formErrorKeys.forEach((key) => {
+            setError(key as keyof FormDataError, {
+              message: formError[key as keyof FormDataError],
+              type: 'Server'
+            })
+          })
+        }
+      }
+    }
   })
+  const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileFromLocal = event.target.files?.[0]
+    if (fileFromLocal && (fileFromLocal.size >= config.maxSizeUploadAvatar || !fileFromLocal.type.includes('image'))) {
+      toast.error('Dung lượng file tối đa 1 MB. Định dạng: .JPEG, .PNG', {
+        autoClose: 1000,
+        position: 'top-center'
+      })
+      return
+    }
+    setFile(fileFromLocal)
+  }
+
+  const handleUpload = () => {
+    fileInputRef.current?.click()
+  }
 
   return (
     <div className='rounded-sm bg-white px-2 pb-10 shadow md:px-7 md:pb-20'>
@@ -141,15 +210,29 @@ export default function Profile() {
           <div className='flex flex-col items-center'>
             <div className='my-5 h-24 w-24'>
               <img
-                src='https://plus.unsplash.com/premium_photo-1744395627552-1349f5d80199?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+                src={previewImage || getAvatarUrl(avatar)}
                 alt='avatar'
                 className='h-full w-full rounded-full object-cover'
               />
             </div>
-            <input type='file' className='hidden' accept='.jpg,.jpeg,.png' />
+            <input
+              type='file'
+              className='hidden'
+              accept='.jpg,.jpeg,.png'
+              ref={fileInputRef}
+              onChange={onFileChange}
+              onClick={(event) => {
+                // * Cách 1:
+                event.currentTarget.value = ''
+                // * Cách 2:
+                // const target = event.target as HTMLInputElement
+                // target.value = ''
+              }}
+            />
             <button
               type='button'
               className='flex h-10 items-center justify-end rounded-sm border bg-white px-6 text-sm text-gray-600 shadow-sm'
+              onClick={handleUpload}
             >
               Chọn ảnh
             </button>

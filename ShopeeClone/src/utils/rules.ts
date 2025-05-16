@@ -103,6 +103,7 @@ export const loginSchema = schema.pick(['email', 'password'])
 export const registerSchema = schema.pick(['email', 'password', 'confirm_password'])
 export const priceSchema = schema.pick(['price_min', 'price_max'])
 export const searchSchema = schema.pick(['name'])
+export const profileSchema = userSchema.pick(['name', 'phone', 'address', 'avatar', 'date_of_birth'])
 
 // Có thể dùng Omit để loại bỏ các trường không cần thiết
 // const loginSchemaOmit = schema.omit(['confirm_password'])

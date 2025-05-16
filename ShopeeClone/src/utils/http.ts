@@ -4,6 +4,7 @@ import { AuthResponse } from '../types/auth.type'
 import { clearLocalStorage, getAccessTokenFromLS, getProfileFromLS, setAccessTokenToLS, setProfileFromLS } from './auth'
 import path from '../constants/path'
 import User from '../types/user.type'
+import config from '../constants/config'
 
 class Http {
   instance: AxiosInstance
@@ -13,7 +14,7 @@ class Http {
     this.accessToken = getAccessTokenFromLS() //Nên khởi tao accessToken trong constructor vì lấy dữ liệu trong ram nhanh hơn
     this.profile = getProfileFromLS() //Lưu vào biến để sử dụng lại nhiều lần
     this.instance = axios.create({
-      baseURL: 'https://api-ecom.duthanhduoc.com/',
+      baseURL: config.baseUrl,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
