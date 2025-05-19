@@ -75,7 +75,7 @@ export default function Login() {
               <Input
                 type='password'
                 name='password'
-                className='mt-3'
+                className='relative mt-3'
                 placeholder='Password'
                 register={register}
                 autoComplete='on'

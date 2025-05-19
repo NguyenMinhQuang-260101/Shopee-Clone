@@ -95,7 +95,7 @@ export default function Register() {
               <Input
                 type='password'
                 name='password'
-                className='mt-3'
+                className='relative mt-3'
                 placeholder='Password'
                 register={register}
                 autoComplete='on'
@@ -104,7 +104,7 @@ export default function Register() {
               <Input
                 type='password'
                 name='confirm_password'
-                className='mt-3'
+                className='relative mt-3'
                 placeholder='Nhập lại mật khẩu'
                 register={register}
                 autoComplete='on'
