@@ -5,7 +5,7 @@ import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 
 import RatingStars from '../RatingStars'
-import { omit } from 'lodash'
+import omit from 'lodash/omit'
 import { NoUndefinedField } from '../../../../types/utils.type'
 import { priceSchema, PriceSchemaType } from '../../../../utils/rules'
 import path from '../../../../constants/path'

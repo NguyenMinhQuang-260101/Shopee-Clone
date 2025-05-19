@@ -4,7 +4,10 @@ import { registerSchema, SchemaType } from '../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Input from '../../components/Input'
 import { useMutation } from '@tanstack/react-query'
-import { omit } from 'lodash'
+// ! Không có tính năng tree-shaking
+// import { omit } from 'lodash/'
+// * Import chỉ mỗi function omit
+import omit from 'lodash/omit'
 import authApi from '../../apis/auth.api'
 import { isAxiosUnprocessableEntityError } from '../../utils/utils'
 import { ErrorResponse } from '../../types/utils.type'
