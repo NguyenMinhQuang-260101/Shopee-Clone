@@ -1,9 +1,7 @@
 import classNames from 'classnames'
 import { Controller, useForm } from 'react-hook-form'
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
-
 import { yupResolver } from '@hookform/resolvers/yup'
-
 import RatingStars from '../RatingStars'
 import omit from 'lodash/omit'
 import { NoUndefinedField } from '../../../../types/utils.type'
@@ -14,6 +12,7 @@ import Button from '../../../../components/Button'
 import { QueryConfig } from '../../../../hooks/useQueryConfig'
 import { Category } from '../../../../types/category.type'
 import InputV2 from '../../../../components/InputV2'
+import { useTranslation } from 'react-i18next'
 interface AsideFilterProps {
   queryConfig: QueryConfig
   categories: Category[]
@@ -28,6 +27,7 @@ interface AsideFilterProps {
 type FromData = NoUndefinedField<PriceSchemaType>
 
 export default function AsideFilter({ queryConfig, categories }: AsideFilterProps) {
+  const { t } = useTranslation('home')
   const { category } = queryConfig
   const {
     control,
@@ -84,7 +84,7 @@ export default function AsideFilter({ queryConfig, categories }: AsideFilterProp
             </g>
           </g>
         </svg>
-        Tất cả danh mục
+        {t('aside filter.all categories')}
       </Link>
       <div className='my-4 h-[1px] bg-gray-300' />
       <ul>
@@ -136,7 +136,7 @@ export default function AsideFilter({ queryConfig, categories }: AsideFilterProp
             />
           </g>
         </svg>
-        Bộ lọc tìm kiếm
+        {t('aside filter.filter search')}
       </Link>
       <div className='my-4 h-[1px] bg-gray-300' />
       <div className='my-5'>
