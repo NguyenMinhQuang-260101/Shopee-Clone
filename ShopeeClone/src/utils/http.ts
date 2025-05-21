@@ -21,7 +21,7 @@ import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from './utils'
 // Refresh Token mới cho me: 5 - 6
 // Gọi lại Me: 6
 
-class Http {
+export class Http {
   instance: AxiosInstance
   private accessToken: string
   private refreshToken: string
@@ -36,7 +36,7 @@ class Http {
       headers: {
         'Content-Type': 'application/json',
         'expire-access-token': 60 * 60, // 1 giờ
-        'expire-refresh-token': 60 * 60 * 24 // 1 ngày
+        'expire-refresh-token': 60 * 60 * 24 * 365 // 1 năm
       }
     })
 
@@ -90,7 +90,6 @@ class Http {
           // const config = (error.response?.config || {}) as import('axios').AxiosRequestConfig
           const config = error.response?.config || ({ headers: {} } as InternalAxiosRequestConfig)
           const { url } = config
-          console.log(config)
           // Trường hợp token hết hạn và request đó không phải là của request refresh token
           // thì mới tiến hanh gọi refresh token
           if (isAxiosExpiredTokenError(error) && url !== URL_REFRESH_TOKEN) {
