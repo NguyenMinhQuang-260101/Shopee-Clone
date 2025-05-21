@@ -47,7 +47,7 @@ export default [
       }
     },
     rules: {
-      'no-unused-vars': 'true',
+      'no-unused-vars': 'warn',
       'react/react-in-jsx-scope': 'off',
       'react/jsx-no-target-blank': 'warn',
       ...reactHooks.configs.recommended.rules,
