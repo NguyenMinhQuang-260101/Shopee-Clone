@@ -2,7 +2,8 @@ import { describe, expect, test } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter } from 'react-router-dom'
+import { logScreen } from './utils/testUtils'
 describe('App', () => {
   test('App render và chuyển trang', async () => {
     render(
@@ -21,7 +22,7 @@ describe('App', () => {
     //* Verify vào đúng trang chủ
     await waitFor(
       () => {
-        expect(document.head.querySelector('title')?.textContent).toBe('Trang chủ')
+        expect(document.head.querySelector('title')?.textContent).toBe('Trang chủ | Shopee Clone')
       },
       {
         timeout: 1000
@@ -39,7 +40,23 @@ describe('App', () => {
         timeout: 1000
       }
     )
+    // Log
+    // screen.debug(document.body.parentElement as HTMLElement, 999999)
+  })
 
-    screen.debug(document.body.parentElement as HTMLElement, 999999)
+  test('Về trang not found', async () => {
+    const badRoute = '/some/bad/route'
+    render(
+      <MemoryRouter initialEntries={[badRoute]}>
+        <App />
+      </MemoryRouter>
+    )
+    // await waitFor(() => {
+    //   expect(screen.getByText(/Page Not Found/i)).not.toBeNull()
+    // })
+
+    await logScreen()
+
+    // screen.debug(document.body.parentElement as HTMLElement, 999999)
   })
 })
