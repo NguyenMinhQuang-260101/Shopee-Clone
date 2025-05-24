@@ -1,37 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App'
 import { BrowserRouter } from 'react-router-dom'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AppProvider } from './contexts/app.context'
-import ErrorBoundary from './components/ErrorBoundary'
+import App from './App'
 import './i18n/i18n'
-import { HelmetProvider } from 'react-helmet-async'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 0
-    }
-  }
-})
+import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <AppProvider>
-        <QueryClientProvider client={queryClient}>
-          <HelmetProvider>
-            <ErrorBoundary>
-              <App />
-            </ErrorBoundary>
-          </HelmetProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </AppProvider>
+      <App />
     </BrowserRouter>
   </StrictMode>
 )
