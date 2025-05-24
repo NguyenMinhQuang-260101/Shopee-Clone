@@ -1,17 +1,10 @@
+import { screen, waitFor } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import App from './App'
-import { BrowserRouter, MemoryRouter } from 'react-router-dom'
-import { logScreen } from './utils/testUtils'
+import path from './constants/path'
+import { logScreen, renderWithRouter } from './utils/testUtils'
 describe('App', () => {
   test('App render và chuyển trang', async () => {
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    )
-    const user = userEvent.setup()
+    const { user } = renderWithRouter()
     /*
      * waitFor sẽ run callback 1 vài lần
      * cho đến khi hết timeout hoặc expect pass
@@ -40,23 +33,28 @@ describe('App', () => {
         timeout: 1000
       }
     )
-    // Log
-    // screen.debug(document.body.parentElement as HTMLElement, 999999)
+    // await logScreen('Chuyển sang trang login')
   })
 
   test('Về trang not found', async () => {
     const badRoute = '/some/bad/route'
-    render(
-      <MemoryRouter initialEntries={[badRoute]}>
-        <App />
-      </MemoryRouter>
+    renderWithRouter({ route: badRoute })
+    await waitFor(() => {
+      expect(screen.getByText(/Page Not Found/i)).not.toBeNull()
+    })
+    // await logScreen('Về trang not found')
+  })
+
+  test('Render trang register', async () => {
+    renderWithRouter({ route: path.register })
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Bạn đã có tài khoản?/i)).not.toBeNull()
+      },
+      {
+        timeout: 1000
+      }
     )
-    // await waitFor(() => {
-    //   expect(screen.getByText(/Page Not Found/i)).not.toBeNull()
-    // })
-
-    await logScreen()
-
-    // screen.debug(document.body.parentElement as HTMLElement, 999999)
+    // await logScreen('Render trang register')
   })
 })
