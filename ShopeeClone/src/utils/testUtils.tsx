@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { prettyDOM, render, screen, waitFor, waitForOptions } from '@testing-library/react'
 import { expect } from 'vitest'
 import App from '../App'

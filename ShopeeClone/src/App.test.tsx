@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
 import path from './constants/path'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { logScreen, renderWithRouter } from './utils/testUtils'
 describe('App', () => {
   test('App render và chuyển trang', async () => {
