@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { logScreen, renderWithRouter } from '../../utils/testUtils'
+import { renderWithRouter } from '../../utils/testUtils'
 import path from '../../constants/path'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
@@ -48,7 +47,6 @@ describe('Login', () => {
       expect(screen.queryByText('Email không hợp lệ')).toBeTruthy()
       expect(screen.queryByText('Mật khẩu không được ngắn hơn 6 ký tự')).toBeTruthy()
     })
-    // await logScreen('Render trang Login')
   })
 
   it('Không nên hiển thị lỗi khi nhập đúng email và password', async () => {

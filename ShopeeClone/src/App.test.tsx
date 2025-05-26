@@ -1,8 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
 import path from './constants/path'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { logScreen, renderWithRouter } from './utils/testUtils'
+import { renderWithRouter } from './utils/testUtils'
 describe('App', () => {
   test('App render và chuyển trang', async () => {
     const { user } = renderWithRouter()
@@ -34,7 +33,6 @@ describe('App', () => {
         timeout: 1000
       }
     )
-    // await logScreen('Chuyển sang trang login')
   })
 
   test('Về trang not found', async () => {
@@ -43,7 +41,6 @@ describe('App', () => {
     await waitFor(() => {
       expect(screen.getByText(/Page Not Found/i)).not.toBeNull()
     })
-    // await logScreen('Về trang not found')
   })
 
   test('Render trang register', async () => {
@@ -56,6 +53,5 @@ describe('App', () => {
         timeout: 1000
       }
     )
-    // await logScreen('Render trang register')
   })
 })
