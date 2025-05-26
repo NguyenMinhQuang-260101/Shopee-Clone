@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { logScreen, renderWithRouter } from '../../utils/testUtils'
 import path from '../../constants/path'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
@@ -70,7 +71,6 @@ describe('Login', () => {
       expect(screen.queryByText('Mật khẩu không được ngắn hơn 6 ký tự')).toBeNull()
     })
     fireEvent.submit(submitButton)
-    await logScreen()
     await waitFor(() => {
       expect(document.querySelector('title')?.textContent).toBe('Trang chủ | Shopee Clone')
     })

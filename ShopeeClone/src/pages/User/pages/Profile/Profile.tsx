@@ -14,6 +14,7 @@ import { setProfileFromLS } from '../../../../utils/auth'
 import { profileSchema, UserSchemaType } from '../../../../utils/rules'
 import { getAvatarUrl, isAxiosUnprocessableEntityError } from '../../../../utils/utils'
 import DateSelect from '../../components/DateSelect'
+import { Helmet } from 'react-helmet-async'
 
 function Info() {
   const {
@@ -25,6 +26,10 @@ function Info() {
   return (
     <Fragment>
       <div className='mt-6 flex flex-col flex-wrap sm:flex-row'>
+        <Helmet>
+          <title>Thông tin cá nhân</title>
+          <meta name='description' content='Thông tin cá nhân của người dùng' />
+        </Helmet>
         <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Tên</div>
         <div className='sm:w-[80%] sm:pl-5'>
           <Input

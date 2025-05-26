@@ -13,24 +13,32 @@ interface AppContextInterface {
   reset: () => void
 }
 
-const initialAppContext: AppContextInterface = {
-  isAuthenticated: Boolean(getAccessTokenFromLS()),
-  setIsAuthenticated: () => null,
-  profile: getProfileFromLS(),
-  setProfile: () => null,
-  extendedPurchases: [],
-  setExtendedPurchases: () => null,
-  reset: () => null
+export const getInitialAppContext: () => AppContextInterface = () => {
+  return {
+    isAuthenticated: Boolean(getAccessTokenFromLS()),
+    setIsAuthenticated: () => null,
+    profile: getProfileFromLS(),
+    setProfile: () => null,
+    extendedPurchases: [],
+    setExtendedPurchases: () => null,
+    reset: () => null
+  }
 }
+
+const initialAppContext = getInitialAppContext()
 
 export const AppContext = createContext<AppContextInterface>(initialAppContext)
 
-export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initialAppContext.isAuthenticated)
-  const [profile, setProfile] = useState<User | null>(initialAppContext.profile)
-  const [extendedPurchases, setExtendedPurchases] = React.useState<ExtendedPurchase[]>(
-    initialAppContext.extendedPurchases
-  )
+export const AppProvider = ({
+  children,
+  defaultValue = initialAppContext
+}: {
+  children: React.ReactNode
+  defaultValue?: AppContextInterface
+}) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(defaultValue.isAuthenticated)
+  const [profile, setProfile] = useState<User | null>(defaultValue.profile)
+  const [extendedPurchases, setExtendedPurchases] = React.useState<ExtendedPurchase[]>(defaultValue.extendedPurchases)
 
   const reset = () => {
     setIsAuthenticated(false)

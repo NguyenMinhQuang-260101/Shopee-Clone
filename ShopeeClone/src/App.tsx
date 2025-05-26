@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import useRouteElements from './useRouteElements'
 import { ToastContainer } from 'react-toastify'
 import { LocalStorageEventTarget } from './utils/auth'
-import { AppContext, AppProvider } from './contexts/app.context'
+import { AppContext } from './contexts/app.context'
 import { HelmetProvider } from 'react-helmet-async'
 import ErrorBoundary from './components/ErrorBoundary'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -19,12 +19,10 @@ function App() {
   return (
     <div>
       <HelmetProvider>
-        <AppProvider>
-          <ErrorBoundary>
-            {routeElements}
-            <ToastContainer />
-          </ErrorBoundary>
-        </AppProvider>
+        <ErrorBoundary>
+          {routeElements}
+          <ToastContainer />
+        </ErrorBoundary>
         <ReactQueryDevtools initialIsOpen={false} />
       </HelmetProvider>
     </div>
