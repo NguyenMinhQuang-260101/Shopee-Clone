@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { Http } from '../http'
 import { HttpStatusCode } from 'axios'
 import { setAccessTokenToLS, setRefreshTokenToLS } from '../auth'
+import { access_token_1s, refresh_token_1000days } from '../../msw/auth.msw'
 
 describe('http axios', () => {
   let http = new Http().instance
@@ -10,10 +11,6 @@ describe('http axios', () => {
     localStorage.clear()
     http = new Http().instance
   })
-  const access_token_1s =
-    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDcyZWFlMjE2Y2E0MDMzZWQxMmJiZiIsImVtYWlsIjoicXVhbmcwM0BnbWFpbC5jb20iLCJyb2xlcyI6WyJVc2VyIl0sImNyZWF0ZWRfYXQiOiIyMDI1LTA1LTIxVDA0OjM4OjQ0LjU5MVoiLCJpYXQiOjE3NDc4MDIzMjQsImV4cCI6MTc0NzgwMjMyNX0.5rgWjjlfaP9nLUbJRfg-6LbmtETaNeD-t830-ganjdU'
-  const refresh_token_1y =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDcyZWFlMjE2Y2E0MDMzZWQxMmJiZiIsImVtYWlsIjoicXVhbmcwM0BnbWFpbC5jb20iLCJyb2xlcyI6WyJVc2VyIl0sImNyZWF0ZWRfYXQiOiIyMDI1LTA1LTIxVDA0OjM4OjQ0LjU5MVoiLCJpYXQiOjE3NDc4MDIzMjQsImV4cCI6MTc3OTMzODMyNH0.8RdQRbIDMfGDDzcik2bQ7xZ6PrZYNmyPElzvaCxTo4g'
 
   it('Gọi API', async () => {
     // Không nên đụng đến thư mục apis
@@ -34,7 +31,7 @@ describe('http axios', () => {
 
   it('Refresh Token', async () => {
     setAccessTokenToLS(access_token_1s)
-    setRefreshTokenToLS(refresh_token_1y)
+    setRefreshTokenToLS(refresh_token_1000days)
     const httpNew = new Http().instance
     const res = await httpNew.get('me')
     // console.log(res)

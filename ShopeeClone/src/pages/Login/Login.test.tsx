@@ -6,16 +6,21 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 describe('Login', () => {
   //* Trong một số trường hợp bị mutiple 1 số thẻ nguyên nhân là dùng beforeEach khiến cho render chồng chéo làm nhân ra nhieu lần
   //* Ta dùng beforeAll để render 1 lần duy nhất
+  let emailInput: HTMLInputElement
+  let passwordInput: HTMLInputElement
+  let submitButton: HTMLButtonElement
   beforeAll(async () => {
     renderWithRouter({ route: path.login })
     await waitFor(() => {
       expect(screen.queryByPlaceholderText('Email')).not.toBeNull()
     })
+    emailInput = document.querySelector('form input[type="email"]') as HTMLInputElement
+    passwordInput = document.querySelector('form input[type="password"]') as HTMLInputElement
+    submitButton = screen.getByRole('button', {
+      name: /Đăng nhập/i
+    }) as HTMLButtonElement
   })
   it('Hiển thị lỗi requited không nhập gì', async () => {
-    const submitButton = screen.getByRole('button', {
-      name: /Đăng nhập/i
-    })
     fireEvent.submit(submitButton)
     // await waitFor(async () => {
     //   expect(await screen.queryByText('Vui lòng nhập email')).not.toBeNull()
@@ -27,13 +32,6 @@ describe('Login', () => {
     })
   })
   it('Hiển thị lỗi nhập email và password không hợp lệ', async () => {
-    // const emailInput = screen.getByRole('textbox', { name: /email/i })
-    // const passwordInput = screen.getByRole('textbox', { name: /password/i })
-    const emailInput = document.querySelector('form input[type="email"]') as Element
-    const passwordInput = document.querySelector('form input[type="password"]') as Element
-    const submitButton = screen.getByRole('button', {
-      name: /Đăng nhập/i
-    })
     fireEvent.change(emailInput, {
       target: {
         value: 'testgmail.com'
@@ -45,8 +43,36 @@ describe('Login', () => {
       }
     })
     fireEvent.submit(submitButton)
-    expect(await screen.findByText('Email không hợp lệ')).toBeTruthy()
-    expect(await screen.findByText('Mật khẩu không được ngắn hơn 6 ký tự')).toBeTruthy()
-    await logScreen('Render trang Login')
+    await waitFor(() => {
+      expect(screen.queryByText('Email không hợp lệ')).toBeTruthy()
+      expect(screen.queryByText('Mật khẩu không được ngắn hơn 6 ký tự')).toBeTruthy()
+    })
+    // await logScreen('Render trang Login')
+  })
+
+  it('Không nên hiển thị lỗi khi nhập đúng email và password', async () => {
+    fireEvent.change(emailInput, {
+      target: {
+        value: 'quang03@gmail.com'
+      }
+    })
+    fireEvent.change(passwordInput, {
+      target: {
+        value: 'quang123456'
+      }
+    })
+    /*
+     * Những trường hợp chứng minh tìm không ra text hay element nào đó
+     * thì nên dùng query hơn là find hay get
+     */
+    await waitFor(() => {
+      expect(screen.queryByText('Email không hợp lệ')).toBeNull()
+      expect(screen.queryByText('Mật khẩu không được ngắn hơn 6 ký tự')).toBeNull()
+    })
+    fireEvent.submit(submitButton)
+    await logScreen()
+    await waitFor(() => {
+      expect(document.querySelector('title')?.textContent).toBe('Trang chủ | Shopee Clone')
+    })
   })
 })

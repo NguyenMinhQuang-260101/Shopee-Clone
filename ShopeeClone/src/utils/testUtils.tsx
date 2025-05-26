@@ -4,6 +4,7 @@ import { expect } from 'vitest'
 import App from '../App'
 import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const delay = (time: number) =>
   new Promise((resolve) =>
@@ -34,12 +35,36 @@ export const logScreen = async (
   // screen.debug(body, 99999999)
 }
 
+const createWarper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false
+      },
+      mutations: {
+        retry: false
+      }
+    }
+  })
+  const Provider = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+  return Provider
+}
+
+const Provider = createWarper()
+
 export const renderWithRouter = ({ route = '/' } = {}) => {
   window.history.pushState({}, 'Test page', route)
   return {
     user: userEvent.setup(),
-    ...render(<App />, {
-      wrapper: BrowserRouter
-    })
+    ...render(
+      <Provider>
+        <App />
+      </Provider>,
+      {
+        wrapper: BrowserRouter
+      }
+    )
   }
 }
