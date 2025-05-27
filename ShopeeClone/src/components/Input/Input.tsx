@@ -1,17 +1,17 @@
-import { RegisterOptions, UseFormRegister } from 'react-hook-form'
-import { FormData } from '../../types/register.type'
+import { FieldPath, FieldValues, RegisterOptions, UseFormRegister } from 'react-hook-form'
 import { useState } from 'react'
 
-interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
+interface Props<TFieldValues extends FieldValues> extends React.InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string
   classNameInput?: string
   classNameError?: string
   classNameEye?: string
-  register?: UseFormRegister<any>
-  rules?: RegisterOptions<FormData, keyof FormData>
+  register?: UseFormRegister<TFieldValues>
+  rules?: RegisterOptions<TFieldValues, FieldPath<TFieldValues>>
+  name: FieldPath<TFieldValues>
 }
 
-export default function Input({
+export default function Input<TFieldValues extends FieldValues>({
   errorMessage,
   className,
   name,
@@ -21,7 +21,7 @@ export default function Input({
   classNameError = 'mt-1 text-[#ff424f] min-h-[1.25rem] text-sm',
   classNameEye = 'absolute bottom-[52%] right-1 h-5 w-5 cursor-pointer',
   ...rest
-}: Props) {
+}: Props<TFieldValues>) {
   const [openEye, setOpenEye] = useState(false)
   const registerResult = register && name ? register(name, rules) : null
 

@@ -69,11 +69,11 @@ export default function Login() {
             <form className='rounded bg-white p-10 shadow-sm' onSubmit={onSubmit} noValidate>
               <div className='text-2xl'>Đăng nhập</div>
               <Input
+                register={register}
                 type='email'
                 name='email'
                 className='mt-8'
                 placeholder='Email'
-                register={register}
                 autoComplete='on'
                 errorMessage={errors.email?.message}
               />
