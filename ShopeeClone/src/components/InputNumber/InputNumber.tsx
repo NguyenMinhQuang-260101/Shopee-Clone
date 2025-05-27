@@ -23,17 +23,24 @@ const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(function Inpu
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target
     const regex = /^[0-9]*$/ // Regular expression to allow only numbers
-    if ((regex.test(value) || value === '') && onChange) {
+    if (regex.test(value) || value === '') {
       // Thực thi onChange callback từ bên ngoài truyền vào props
-      onChange && onChange(event)
+      onChange?.(event)
       // Cập nhập localValue state
       setLocalValue(value)
     }
   }
+  console.log(value)
 
   return (
     <div className={className}>
-      <input className={classNameInput} onChange={handleChange} {...rest} value={value || localValue} ref={ref} />
+      <input
+        className={classNameInput}
+        onChange={handleChange}
+        {...rest}
+        value={value === undefined ? localValue : value}
+        ref={ref}
+      />
       <div className={classNameError}>{errorMessage}</div>
     </div>
   )
