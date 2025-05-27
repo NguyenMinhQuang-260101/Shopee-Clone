@@ -30,7 +30,6 @@ const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(function Inpu
       setLocalValue(value)
     }
   }
-  console.log(value)
 
   return (
     <div className={className}>

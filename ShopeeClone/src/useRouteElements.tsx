@@ -40,15 +40,6 @@ export default function useRouteElements() {
   const routeElements = useRoutes([
     {
       path: '',
-      index: true, //Set giá trị index cho path chính để có thể di chuyện đoạn code này chỗ nào cũng được tránh lỗi tìm thấy không tìm thấy path chính
-      element: (
-        <MainLayout>
-          <ProductList />
-        </MainLayout>
-      )
-    },
-    {
-      path: '',
       element: <ProtectedRoute />,
       children: [
         {
@@ -63,33 +54,63 @@ export default function useRouteElements() {
         },
         {
           path: path.user,
-          element: (
-            <MainLayout>
-              <UserLayout />
-            </MainLayout>
-          ),
+          element: <MainLayout />,
           children: [
             {
-              path: path.profile,
+              path: '',
+              element: <UserLayout />,
+              children: [
+                {
+                  path: path.profile,
+                  element: (
+                    <Suspense>
+                      <Profile />
+                    </Suspense>
+                  )
+                },
+                {
+                  path: path.changePassword,
+                  element: (
+                    <Suspense>
+                      <ChangePassword />
+                    </Suspense>
+                  )
+                },
+                {
+                  path: path.historyPurchase,
+                  element: (
+                    <Suspense>
+                      <HistoryPurchase />
+                    </Suspense>
+                  )
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      path: '',
+      element: <RejectedRoute />,
+      children: [
+        {
+          path: '',
+          element: <RegisterLayout />,
+          children: [
+            {
+              path: path.login,
               element: (
-                <Suspense>
-                  <Profile />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Login />
                 </Suspense>
               )
             },
             {
-              path: path.changePassword,
+              path: path.register,
               element: (
                 <Suspense>
-                  <ChangePassword />
-                </Suspense>
-              )
-            },
-            {
-              path: path.historyPurchase,
-              element: (
-                <Suspense>
-                  <HistoryPurchase />
+                  <Register />
                 </Suspense>
               )
             }
@@ -98,50 +119,31 @@ export default function useRouteElements() {
       ]
     },
     {
-      path: path.productDetail,
-      element: (
-        <MainLayout>
-          <Suspense>
-            <ProductDetail />
-          </Suspense>
-        </MainLayout>
-      )
-    },
-    {
       path: '',
-      element: <RejectedRoute />,
+      element: <MainLayout />,
       children: [
         {
-          path: path.login,
+          path: '',
+          index: true, //Set giá trị index cho path chính để có thể di chuyện đoạn code này chỗ nào cũng được tránh lỗi tìm thấy không tìm thấy path chính
+          element: <ProductList />
+        },
+        {
+          path: path.productDetail,
           element: (
-            <RegisterLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Login />
-              </Suspense>
-            </RegisterLayout>
+            <Suspense>
+              <ProductDetail />
+            </Suspense>
           )
         },
         {
-          path: path.register,
+          path: '*',
           element: (
-            <RegisterLayout>
-              <Suspense>
-                <Register />
-              </Suspense>
-            </RegisterLayout>
+            <Suspense>
+              <NotFound />
+            </Suspense>
           )
         }
       ]
-    },
-    {
-      path: '*',
-      element: (
-        <MainLayout>
-          <Suspense>
-            <NotFound />
-          </Suspense>
-        </MainLayout>
-      )
     }
   ])
 
