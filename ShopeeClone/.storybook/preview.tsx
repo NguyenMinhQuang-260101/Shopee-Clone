@@ -1,8 +1,8 @@
 import type { Preview } from '@storybook/react'
-import { BrowserRouter } from 'react-router-dom'
 import { AppProvider } from '../src/contexts/app.context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
+import { withRouter } from 'storybook-addon-remix-react-router'
 import '../src/index.css'
 
 const queryClient = new QueryClient({
@@ -24,16 +24,15 @@ const preview: Preview = {
     }
   },
   decorators: [
+    withRouter,
     (Story) => (
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <AppProvider>
-            <HelmetProvider>
-              <Story />
-            </HelmetProvider>
-          </AppProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <HelmetProvider>
+            <Story />
+          </HelmetProvider>
+        </AppProvider>
+      </QueryClientProvider>
     )
   ]
 }
